@@ -160,6 +160,15 @@ struct HealthCard: View {
 
 // MARK: - Scooping one pile (batch review)
 
+/// How a pile is ordered on the scooping screen, so you can decide what to scoop first
+enum ScoopSort: String, CaseIterable, Identifiable {
+    case biggest = "Biggest"
+    case oldest = "Oldest"
+    case newest = "Newest"
+
+    var id: String { rawValue }
+}
+
 struct CleanupView: View {
     let kind: JunkKind
     @EnvironmentObject var game: GameState
@@ -183,6 +192,8 @@ struct CleanupView: View {
     @State private var preview: PreviewItem?
     @State private var confirmTrash = false
     @EnvironmentObject var router: Router
+    /// Remembered between sessions
+    @AppStorage("scoopSort") private var sort: ScoopSort = .biggest
 
     private var batchLimit: Int {
         switch kind {
@@ -198,6 +209,40 @@ struct CleanupView: View {
     private var allAssets: [PHAsset] { kind == .twins ? groups.flatMap { $0 } : items }
     private var tossAssets: [PHAsset] { allAssets.filter { !keep.contains($0.localIdentifier) } }
     private var tossBytes: Int64 { tossAssets.reduce(Int64(0)) { $0 + (sizes[$1.localIdentifier] ?? 0) } }
+
+    // MARK: Sorting
+
+    private func date(_ asset: PHAsset) -> Date { asset.creationDate ?? .distantPast }
+    private func bytes(_ asset: PHAsset) -> Int64 { sizes[asset.localIdentifier] ?? 0 }
+    private func groupBytes(_ group: [PHAsset]) -> Int64 { group.reduce(Int64(0)) { $0 + bytes($1) } }
+    private func groupDate(_ group: [PHAsset]) -> Date { group.map(date).min() ?? .distantPast }
+
+    private var sortedItems: [PHAsset] {
+        switch sort {
+        case .biggest: return items.sorted { bytes($0) > bytes($1) }
+        case .oldest: return items.sorted { date($0) < date($1) }
+        case .newest: return items.sorted { date($0) > date($1) }
+        }
+    }
+
+    /// Twin groups keep their photos in the order they were taken; the groups themselves are sorted
+    private var sortedGroups: [[PHAsset]] {
+        switch sort {
+        case .biggest: return groups.sorted { groupBytes($0) > groupBytes($1) }
+        case .oldest: return groups.sorted { groupDate($0) < groupDate($1) }
+        case .newest: return groups.sorted { groupDate($0) > groupDate($1) }
+        }
+    }
+
+    /// The little label on each photo: its size, or when it was taken
+    private func badge(for asset: PHAsset) -> String {
+        switch sort {
+        case .biggest:
+            return ByteCountFormatter.string(fromByteCount: bytes(asset), countStyle: .file)
+        case .oldest, .newest:
+            return asset.creationDate?.formatted(.dateTime.month(.abbreviated).year()) ?? ""
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -266,20 +311,21 @@ struct CleanupView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 intro
+                if allAssets.count > 1 { sortPicker }
                 if checking { checkingBanner } else { selectionBar }
                 switch kind {
                 case .screenshots, .oopsies:
                     LazyVGrid(columns: columns, spacing: 6) {
-                        ForEach(items, id: \.localIdentifier) { asset in
+                        ForEach(sortedItems, id: \.localIdentifier) { asset in
                             tile(asset, side: 120)
                         }
                     }
                 case .giants:
-                    ForEach(items, id: \.localIdentifier) { asset in
+                    ForEach(sortedItems, id: \.localIdentifier) { asset in
                         videoRow(asset)
                     }
                 case .twins:
-                    ForEach(Array(groups.enumerated()), id: \.offset) { index, group in
+                    ForEach(Array(sortedGroups.enumerated()), id: \.element.first?.localIdentifier) { index, group in
                         twinRow(index: index, group: group)
                     }
                 }
@@ -323,6 +369,19 @@ struct CleanupView: View {
         }
     }
 
+    private var sortPicker: some View {
+        HStack(spacing: 10) {
+            Text("Sort")
+                .font(.subheadline.bold())
+            Picker("Sort", selection: $sort.animation(.snappy)) {
+                ForEach(ScoopSort.allCases) { option in
+                    Text(option.rawValue).tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+
     private var selectionBar: some View {
         HStack(spacing: 10) {
             Text("\(tossAssets.count) of \(allAssets.count) selected to scoop")
@@ -358,7 +417,7 @@ struct CleanupView: View {
         .background(Color.teal.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func tile(_ asset: PHAsset, side: CGFloat) -> some View {
+    private func tile(_ asset: PHAsset, side: CGFloat, showBadge: Bool = true) -> some View {
         let id = asset.localIdentifier
         let kept = keep.contains(id)
         return Thumbnail(asset: asset, side: side)
@@ -384,6 +443,16 @@ struct CleanupView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Watch video")
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if showBadge, reasons[id] == nil {
+                    Text(badge(for: asset))
+                        .font(.system(size: 9, weight: .bold))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 3)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                        .padding(4)
                 }
             }
             .overlay(alignment: .bottomLeading) {
@@ -422,7 +491,7 @@ struct CleanupView: View {
 
     private func videoRow(_ asset: PHAsset) -> some View {
         HStack(spacing: 12) {
-            tile(asset, side: 90)
+            tile(asset, side: 90, showBadge: false)   // the row already shows size and date
                 .frame(width: 90, height: 90)
             VStack(alignment: .leading, spacing: 3) {
                 Text(ByteCountFormatter.string(fromByteCount: sizes[asset.localIdentifier] ?? 0, countStyle: .file))
@@ -440,9 +509,13 @@ struct CleanupView: View {
 
     private func twinRow(index: Int, group: [PHAsset]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Group \(index + 1)")
-                .font(.caption.bold())
-                .foregroundStyle(.secondary)
+            HStack {
+                Text("Group \(index + 1)")
+                Spacer()
+                Text("\(ByteCountFormatter.string(fromByteCount: groupBytes(group), countStyle: .file)) · \(groupDate(group).formatted(date: .abbreviated, time: .omitted))")
+            }
+            .font(.caption.bold())
+            .foregroundStyle(.secondary)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(group, id: \.localIdentifier) { asset in
@@ -628,8 +701,9 @@ struct CleanupView: View {
             let bytes = try await library.delete(toss)
             game.keep(keptIDs)
             library.remove(Set(all.map(\.localIdentifier)), deletedCount: toss.count)
-            game.applyScanIfNeeded(library.report)
+            // Reward first, so the server checks it against the scan from before these were deleted
             let result = game.rewardCleanup(kind: kind, count: toss.count, bytes: bytes)
+            game.applyScanIfNeeded(library.report)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             withAnimation(.spring) { reward = result }
         } catch {

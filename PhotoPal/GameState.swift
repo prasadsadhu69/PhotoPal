@@ -196,7 +196,10 @@ final class GameState: ObservableObject {
 
     var petName: String {
         get { data.petName }
-        set { data.petName = newValue }
+        set {
+            data.petName = newValue
+            sync(.rename(newValue))
+        }
     }
 
     var mood: PetMood {
@@ -296,6 +299,7 @@ final class GameState: ObservableObject {
         d.otherPals.append(activeAsPal(d))
         load(chosen, into: &d)
         data = d
+        sync(.switchPal(palId: id.uuidString))
     }
 
     /// Spends a ticket to adopt a new baby animal, who becomes the one you're caring for
@@ -311,6 +315,7 @@ final class GameState: ObservableObject {
                        food: 80, joy: 85, energy: 90, sick: false, hatID: nil, neckID: nil)
         load(baby, into: &d)
         data = d
+        sync(.adoptPal(species: species.rawValue, name: name, paletteId: paletteID))
         return true
     }
 
@@ -362,6 +367,14 @@ final class GameState: ObservableObject {
         }
         Self.checkSick(&d, now: Date())
         data = d
+        // Only counts and sizes go to the server, never photo IDs
+        var counts: [String: Int] = [:]
+        var bytes: [String: Int64] = [:]
+        for kind in JunkKind.allCases {
+            counts[kind.rawValue] = report.count(kind)
+            bytes[kind.rawValue] = report.bytesFor(kind)
+        }
+        sync(.reportScan(counts: counts, bytes: bytes, totalAssets: report.totalAssets))
     }
 
     func applyScanIfNeeded(_ report: JunkReport?) {
@@ -423,6 +436,7 @@ final class GameState: ObservableObject {
         d.xp += min(60, count * 3) + 10
         let grew = Self.advanceStage(&d)
         data = d
+        sync(.claimCleanup(kind: kind.rawValue, count: count, bytes: bytes))
 
         var result = reward
         result.grewTo = grew
@@ -459,6 +473,7 @@ final class GameState: ObservableObject {
         let grew = Self.advanceStage(&d)
         data = d
         if let grew { justGrew = grew }
+        sync(.feed(itemId: item.id))
         return true
     }
 
@@ -472,6 +487,7 @@ final class GameState: ObservableObject {
         d.energy = max(0, d.energy - 2)
         d.xp += 1
         data = d
+        sync(.play)
     }
 
     /// Grooming: a quick brush makes your pal happy
@@ -481,8 +497,10 @@ final class GameState: ObservableObject {
         d.joy = min(100, d.joy + 3)
         d.xp += 1
         data = d
+        sync(.brush)
     }
 
+    /// Pats are tiny (+0.5 joy) and frequent, so they stay on the phone and aren't sent to the server
     func pat() {
         guard !data.sleeping else { return }
         data.joy = min(100, data.joy + 0.5)
@@ -490,6 +508,7 @@ final class GameState: ObservableObject {
 
     func toggleLights() {
         data.sleeping.toggle()
+        sync(.toggleLights)
     }
 
     var medicineCount: Int { data.inventory["medicine"] ?? 0 }
@@ -503,6 +522,7 @@ final class GameState: ObservableObject {
         d.sickImmuneUntil = Date().addingTimeInterval(24 * 3600)
         d.joy = min(100, d.joy + 5)
         data = d
+        sync(.giveMedicine)
         return true
     }
 
@@ -524,6 +544,7 @@ final class GameState: ObservableObject {
             d.itemsTossed += 1
         }
         data = d
+        sync(.finishDig(foundSomething: foundSomething, freedBytes: freedBytes))
     }
 
     // MARK: Shop
@@ -544,6 +565,7 @@ final class GameState: ObservableObject {
         }
         d.coins -= item.price
         data = d
+        sync(.buy(itemId: item.id))
         return true
     }
 
@@ -557,8 +579,9 @@ final class GameState: ObservableObject {
         switch item.category {
         case .hat: data.hatID = (data.hatID == item.id) ? nil : item.id
         case .neck: data.neckID = (data.neckID == item.id) ? nil : item.id
-        default: break
+        default: return
         }
+        sync(.toggleWear(itemId: item.id))
     }
 
     private func paletteKey(_ p: PetPalette) -> String { "\(data.look.species.rawValue).\(p.id)" }
@@ -579,6 +602,7 @@ final class GameState: ObservableObject {
         d.look.paletteID = p.id
         d.look.custom = nil
         data = d
+        sync(.choosePalette(paletteId: p.id))
         return true
     }
 
@@ -591,11 +615,15 @@ final class GameState: ObservableObject {
         d.coins -= Self.photoMatchPrice
         d.photoMatchUnlocked = true
         data = d
+        sync(.unlockPhotoMatch)
         return true
     }
 
     func applyCustomPalette(_ p: PetPalette) {
         data.look.custom = p
+        // Photo Match runs on the phone; only the three colors are sent
+        sync(.applyCustomPalette(main: [p.main.r, p.main.g, p.main.b], accent: [p.accent.r, p.accent.g, p.accent.b],
+                                 belly: [p.belly.r, p.belly.g, p.belly.b], blaze: p.blaze))
     }
 
     // MARK: Adopting (first launch)
@@ -614,11 +642,19 @@ final class GameState: ObservableObject {
             d.neckID = "collar"
         }
         data = d
+        sync(.adopt(species: species.rawValue, name: name, paletteId: paletteID))
     }
 
-    func finishOnboarding() { data.onboarded = true }
+    func finishOnboarding() {
+        data.onboarded = true
+        sync(.finishOnboarding)
+    }
 
-    func resetGame() { data = SaveData() }
+    /// Erases the pal on the phone and, when the backend is on, deletes the cloud save and starts a new account
+    func resetGame() {
+        data = SaveData()
+        Task { await BackendSync.shared.resetAccount() }
+    }
 
     // MARK: Yard building
 
@@ -630,17 +666,21 @@ final class GameState: ObservableObject {
 
     func placeDecor(_ id: String) {
         guard decorAvailable(id) > 0 else { return }
-        data.placed.append(PlacedDecor(itemID: id, x: Double.random(in: 0.25...0.75), y: Double.random(in: 0.25...0.6)))
+        let decor = PlacedDecor(itemID: id, x: Double.random(in: 0.25...0.75), y: Double.random(in: 0.25...0.6))
+        data.placed.append(decor)
+        sync(.placeDecor(itemId: id, id: decor.id.uuidString, x: decor.x, y: decor.y))
     }
 
     func moveDecor(_ id: UUID, x: Double, y: Double) {
         guard let i = data.placed.firstIndex(where: { $0.id == id }) else { return }
         data.placed[i].x = min(max(x, 0.06), 0.94)
         data.placed[i].y = min(max(y, 0.02), 0.95)
+        sync(.moveDecor(id: id.uuidString, x: data.placed[i].x, y: data.placed[i].y))
     }
 
     func storeDecor(_ id: UUID) {
         data.placed.removeAll { $0.id == id }
+        sync(.storeDecor(id: id.uuidString))
     }
 
     // MARK: Widget
@@ -658,5 +698,103 @@ final class GameState: ObservableObject {
         if let raw = try? JSONEncoder().encode(data) {
             UserDefaults.standard.set(raw, forKey: Self.saveKey)
         }
+    }
+
+    // MARK: Backend sync (see BackendSync.swift)
+
+    private func sync(_ action: GameAction) {
+        BackendSync.shared.send(action)
+    }
+
+    /// The on-device save as JSON, sent once when a player first connects so they keep their pal.
+    /// Photo IDs (kept photos, checked twins) are removed: they stay on the phone.
+    func legacySaveForUpload() -> [String: Any]? {
+        guard let raw = try? JSONEncoder().encode(data),
+              var json = (try? JSONSerialization.jsonObject(with: raw)) as? [String: Any] else { return nil }
+        json.removeValue(forKey: "keptIDs")
+        json.removeValue(forKey: "notTwinIDs")
+        return json
+    }
+
+    /// Replaces the local game with the server's version. Photo IDs stay as they are on the phone.
+    func applyRemote(_ r: RemoteState, grewTo: String?) {
+        var d = data
+        let before = (id: d.activeID, stage: d.stage)
+        let active = Self.pal(from: r.pal)
+
+        d.onboarded = r.onboarded
+        d.activeID = active.id
+        d.petName = active.name
+        d.look = active.look
+        d.born = active.born
+        d.stage = active.stage
+        d.xp = active.xp
+        d.careMistakes = active.careMistakes
+        d.food = active.food
+        d.joy = active.joy
+        d.energy = active.energy
+        d.sick = active.sick
+        d.hatID = active.hatID
+        d.neckID = active.neckID
+        d.otherPals = r.otherPals.map { Self.pal(from: $0) }
+        d.tickets = r.tickets
+
+        d.clean = r.clean
+        d.sleeping = r.sleeping
+        d.sickImmuneUntil = r.sickImmuneUntil.map { Date(timeIntervalSince1970: $0 / 1000) }
+        d.lastTick = Date(timeIntervalSince1970: r.lastTick / 1000)
+
+        d.coins = r.coins
+        d.inventory = r.inventory
+        d.wardrobe = Set(r.wardrobe)
+        d.palettesOwned = Set(r.palettesOwned)
+        d.photoMatchUnlocked = r.photoMatchUnlocked
+        d.decorOwned = r.decorOwned
+        d.placed = r.placed.map { PlacedDecor(id: UUID(uuidString: $0.id) ?? UUID(), itemID: $0.itemId, x: $0.x, y: $0.y) }
+
+        d.itemsTossed = r.itemsTossed
+        d.bytesFreed = r.bytesFreed
+        d.cleanups = r.cleanups
+        d.poops = r.poops
+        d.streak = r.streak
+        d.lastPlayDay = Self.day(r.lastPlayDay)
+        d.lastCleanDay = Self.day(r.lastCleanDay)
+        d.lastDigDay = Self.day(r.lastDigDay)
+        d.daily = r.daily.flatMap { b in
+            JunkKind(rawValue: b.kind).map {
+                DailyBounty(kind: $0, target: b.target, progress: b.progress, reward: b.reward, day: Self.day(b.day) ?? Date(), paid: b.paid)
+            }
+        }
+        d.milestones = Set(r.milestones)
+        d.hasFed = r.hasFed
+        data = d
+
+        // Celebrate growing up only if the server's pal grew past what the phone already showed
+        if let grew = grewTo.flatMap(LifeStage.init(rawValue:)), before.id == d.activeID, before.stage != grew {
+            justGrew = grew
+        }
+    }
+
+    private static func pal(from p: RemotePal) -> Pal {
+        Pal(id: UUID(uuidString: p.id) ?? UUID(), name: p.name, look: look(from: p.look),
+            born: Date(timeIntervalSince1970: p.born / 1000), stage: LifeStage(rawValue: p.stage) ?? .baby,
+            xp: p.xp, careMistakes: p.careMistakes, food: p.food, joy: p.joy, energy: p.energy, sick: p.sick,
+            hatID: p.hatId, neckID: p.neckId)
+    }
+
+    private static func look(from l: RemoteLook) -> PetLook {
+        PetLook(species: Species(rawValue: l.species) ?? .dog, paletteID: l.paletteId, custom: l.custom.map { palette(from: $0) })
+    }
+
+    private static func palette(from p: RemotePalette) -> PetPalette {
+        func rgb(_ v: [Double]) -> RGB { v.count == 3 ? RGB(v[0], v[1], v[2]) : RGB(0.5, 0.5, 0.5) }
+        return PetPalette(id: p.id, name: p.name, main: rgb(p.main), accent: rgb(p.accent), belly: rgb(p.belly),
+                          blaze: p.blaze, price: p.price)
+    }
+
+    /// The server's local-day strings ("2026-11-02") as a date at noon on that day
+    private static func day(_ s: String?) -> Date? {
+        guard let parts = s?.split(separator: "-").compactMap({ Int($0) }), parts.count == 3 else { return nil }
+        return Calendar.current.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12))
     }
 }

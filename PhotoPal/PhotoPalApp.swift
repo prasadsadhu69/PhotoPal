@@ -26,6 +26,9 @@ struct PhotoPalApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        // Cloud save and server-side game rules (no-op until Firebase is added; see backend/README.md)
+        BackendSync.configure()
+
         // Friendly rounded headers in navigation bars
         if let title = UIFont(name: "Fredoka-SemiBold", size: 18),
            let large = UIFont(name: "Fredoka-Bold", size: 32) {
@@ -42,11 +45,13 @@ struct PhotoPalApp: App {
                 .environmentObject(game)
                 .environmentObject(library)
                 .environmentObject(router)
+                .task { await BackendSync.shared.connect(game) }
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {
                     case .active:
                         // Your pal gets hungry while the app is closed
                         game.tick()
+                        Task { await BackendSync.shared.connect(game) }
                         if game.onboarded && library.hasAccess {
                             Task { await library.refresh(game) }
                             library.loadVault()

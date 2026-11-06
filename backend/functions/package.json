@@ -1,0 +1,30 @@
+{
+  "name": "photopal-functions",
+  "version": "1.0.0",
+  "description": "PhotoPal backend: game rules, cloud save, economy, catalog, reminders",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "vitest run",
+    "gen:catalog": "node scripts/gen-catalog.mjs ../../PhotoPal/Models.swift",
+    "seed:catalog": "node scripts/seed-catalog.mjs",
+    "deploy": "firebase deploy --only functions,firestore",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "13.8.0",
+    "firebase-functions": "6.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.13",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  }
+}

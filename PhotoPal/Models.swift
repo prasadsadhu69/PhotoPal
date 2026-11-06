@@ -397,7 +397,7 @@ struct PlacedDecor: Codable, Identifiable, Equatable {
 
 enum Shared {
     /// Must match the App Group in Signing & Capabilities (both targets)
-    static let appGroup = "group.com.pranati.PhotoPal"
+    static let appGroup = "group.clubooo"
 }
 
 struct WidgetSnapshot: Codable {

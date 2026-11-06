@@ -1,0 +1,840 @@
+{
+  "version": 1,
+  "species": {
+    "dog": {
+      "title": "Dog",
+      "defaultName": "Peanut",
+      "babyName": "Puppy",
+      "favoriteFood": "pupcake",
+      "palettes": [
+        {
+          "id": "peanut",
+          "name": "Peanut",
+          "main": [
+            0.95,
+            0.84,
+            0.66
+          ],
+          "accent": [
+            0.86,
+            0.68,
+            0.45
+          ],
+          "belly": [
+            1,
+            0.98,
+            0.95
+          ],
+          "blaze": true,
+          "price": 0
+        },
+        {
+          "id": "golden",
+          "name": "Golden",
+          "main": [
+            0.88,
+            0.66,
+            0.38
+          ],
+          "accent": [
+            0.68,
+            0.44,
+            0.22
+          ],
+          "belly": [
+            0.98,
+            0.9,
+            0.78
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "choco",
+          "name": "Chocolate",
+          "main": [
+            0.52,
+            0.34,
+            0.22
+          ],
+          "accent": [
+            0.32,
+            0.2,
+            0.13
+          ],
+          "belly": [
+            0.82,
+            0.7,
+            0.6
+          ],
+          "blaze": false,
+          "price": 150
+        },
+        {
+          "id": "husky",
+          "name": "Husky",
+          "main": [
+            0.6,
+            0.62,
+            0.68
+          ],
+          "accent": [
+            0.34,
+            0.36,
+            0.42
+          ],
+          "belly": [
+            0.98,
+            0.98,
+            1
+          ],
+          "blaze": true,
+          "price": 200
+        }
+      ]
+    },
+    "cat": {
+      "title": "Cat",
+      "defaultName": "Mochi",
+      "babyName": "Kitten",
+      "favoriteFood": "salmon",
+      "palettes": [
+        {
+          "id": "ginger",
+          "name": "Ginger",
+          "main": [
+            0.96,
+            0.62,
+            0.32
+          ],
+          "accent": [
+            0.98,
+            0.72,
+            0.7
+          ],
+          "belly": [
+            1,
+            0.93,
+            0.84
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "tuxedo",
+          "name": "Tuxedo",
+          "main": [
+            0.2,
+            0.2,
+            0.23
+          ],
+          "accent": [
+            0.95,
+            0.7,
+            0.72
+          ],
+          "belly": [
+            0.97,
+            0.97,
+            0.97
+          ],
+          "blaze": true,
+          "price": 0
+        },
+        {
+          "id": "smoky",
+          "name": "Smoky",
+          "main": [
+            0.62,
+            0.64,
+            0.7
+          ],
+          "accent": [
+            0.95,
+            0.72,
+            0.75
+          ],
+          "belly": [
+            0.92,
+            0.92,
+            0.95
+          ],
+          "blaze": false,
+          "price": 150
+        },
+        {
+          "id": "snow",
+          "name": "Snowball",
+          "main": [
+            0.98,
+            0.97,
+            0.95
+          ],
+          "accent": [
+            0.98,
+            0.72,
+            0.78
+          ],
+          "belly": [
+            1,
+            1,
+            1
+          ],
+          "blaze": false,
+          "price": 200
+        }
+      ]
+    },
+    "bunny": {
+      "title": "Bunny",
+      "defaultName": "Clover",
+      "babyName": "Baby bunny",
+      "favoriteFood": "carrot",
+      "palettes": [
+        {
+          "id": "cotton",
+          "name": "Cotton",
+          "main": [
+            0.97,
+            0.96,
+            0.94
+          ],
+          "accent": [
+            1,
+            0.76,
+            0.82
+          ],
+          "belly": [
+            1,
+            1,
+            1
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "cocoa",
+          "name": "Cocoa",
+          "main": [
+            0.62,
+            0.47,
+            0.36
+          ],
+          "accent": [
+            0.9,
+            0.66,
+            0.66
+          ],
+          "belly": [
+            0.92,
+            0.86,
+            0.8
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "honey",
+          "name": "Honey",
+          "main": [
+            0.93,
+            0.76,
+            0.46
+          ],
+          "accent": [
+            1,
+            0.72,
+            0.72
+          ],
+          "belly": [
+            1,
+            0.95,
+            0.86
+          ],
+          "blaze": false,
+          "price": 150
+        },
+        {
+          "id": "lilac",
+          "name": "Lilac",
+          "main": [
+            0.8,
+            0.74,
+            0.9
+          ],
+          "accent": [
+            0.98,
+            0.72,
+            0.86
+          ],
+          "belly": [
+            0.96,
+            0.94,
+            0.99
+          ],
+          "blaze": false,
+          "price": 200
+        }
+      ]
+    },
+    "panda": {
+      "title": "Panda",
+      "defaultName": "Bao",
+      "babyName": "Cub",
+      "favoriteFood": "bamboo",
+      "palettes": [
+        {
+          "id": "classic",
+          "name": "Classic",
+          "main": [
+            0.97,
+            0.97,
+            0.96
+          ],
+          "accent": [
+            0.13,
+            0.13,
+            0.15
+          ],
+          "belly": [
+            1,
+            1,
+            1
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "cocoa",
+          "name": "Cocoa",
+          "main": [
+            0.96,
+            0.93,
+            0.88
+          ],
+          "accent": [
+            0.45,
+            0.3,
+            0.22
+          ],
+          "belly": [
+            1,
+            0.98,
+            0.95
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "sakura",
+          "name": "Sakura",
+          "main": [
+            0.99,
+            0.94,
+            0.95
+          ],
+          "accent": [
+            0.93,
+            0.5,
+            0.62
+          ],
+          "belly": [
+            1,
+            1,
+            1
+          ],
+          "blaze": false,
+          "price": 200
+        },
+        {
+          "id": "midnight",
+          "name": "Midnight",
+          "main": [
+            0.28,
+            0.28,
+            0.33
+          ],
+          "accent": [
+            0.95,
+            0.95,
+            0.97
+          ],
+          "belly": [
+            0.4,
+            0.4,
+            0.46
+          ],
+          "blaze": false,
+          "price": 250
+        }
+      ]
+    },
+    "fox": {
+      "title": "Fox",
+      "defaultName": "Maple",
+      "babyName": "Kit",
+      "favoriteFood": "berries",
+      "palettes": [
+        {
+          "id": "red",
+          "name": "Red",
+          "main": [
+            0.95,
+            0.5,
+            0.2
+          ],
+          "accent": [
+            0.25,
+            0.18,
+            0.15
+          ],
+          "belly": [
+            1,
+            0.97,
+            0.94
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "arctic",
+          "name": "Arctic",
+          "main": [
+            0.96,
+            0.97,
+            1
+          ],
+          "accent": [
+            0.62,
+            0.68,
+            0.8
+          ],
+          "belly": [
+            1,
+            1,
+            1
+          ],
+          "blaze": false,
+          "price": 0
+        },
+        {
+          "id": "fennec",
+          "name": "Fennec",
+          "main": [
+            0.95,
+            0.85,
+            0.65
+          ],
+          "accent": [
+            0.8,
+            0.55,
+            0.4
+          ],
+          "belly": [
+            1,
+            0.97,
+            0.9
+          ],
+          "blaze": false,
+          "price": 150
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "main": [
+            0.55,
+            0.55,
+            0.6
+          ],
+          "accent": [
+            0.18,
+            0.18,
+            0.22
+          ],
+          "belly": [
+            0.95,
+            0.95,
+            0.97
+          ],
+          "blaze": false,
+          "price": 200
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "kibble",
+      "name": "Crunchy Kibble",
+      "symbol": "circle.grid.2x2.fill",
+      "category": "food",
+      "price": 8,
+      "food": 12,
+      "joy": 2,
+      "comfort": 0
+    },
+    {
+      "id": "berries",
+      "name": "Wild Berries",
+      "symbol": "leaf.fill",
+      "category": "food",
+      "price": 10,
+      "food": 14,
+      "joy": 4,
+      "comfort": 0
+    },
+    {
+      "id": "carrot",
+      "name": "Carrot Stick",
+      "symbol": "carrot.fill",
+      "category": "food",
+      "price": 12,
+      "food": 15,
+      "joy": 3,
+      "comfort": 0
+    },
+    {
+      "id": "bamboo",
+      "name": "Bamboo Shoots",
+      "symbol": "laurel.leading",
+      "category": "food",
+      "price": 12,
+      "food": 18,
+      "joy": 3,
+      "comfort": 0
+    },
+    {
+      "id": "salmon",
+      "name": "Salmon Bite",
+      "symbol": "fish.fill",
+      "category": "food",
+      "price": 35,
+      "food": 45,
+      "joy": 8,
+      "comfort": 0
+    },
+    {
+      "id": "pupcake",
+      "name": "Pupcake",
+      "symbol": "birthday.cake.fill",
+      "category": "food",
+      "price": 80,
+      "food": 60,
+      "joy": 30,
+      "comfort": 0
+    },
+    {
+      "id": "tennis",
+      "name": "Tennis Ball",
+      "symbol": "tennisball.fill",
+      "category": "toy",
+      "price": 40,
+      "food": 0,
+      "joy": 25,
+      "comfort": 0
+    },
+    {
+      "id": "squeaky",
+      "name": "Squeaky Bird",
+      "symbol": "bird.fill",
+      "category": "toy",
+      "price": 60,
+      "food": 0,
+      "joy": 40,
+      "comfort": 0
+    },
+    {
+      "id": "winetoy",
+      "name": "Plush Wine Bottle",
+      "symbol": "wineglass.fill",
+      "category": "toy",
+      "price": 70,
+      "food": 0,
+      "joy": 45,
+      "comfort": 0
+    },
+    {
+      "id": "music",
+      "name": "Music Box",
+      "symbol": "music.note",
+      "category": "toy",
+      "price": 90,
+      "food": 0,
+      "joy": 50,
+      "comfort": 0
+    },
+    {
+      "id": "medicine",
+      "name": "Medicine",
+      "symbol": "cross.case.fill",
+      "category": "care",
+      "price": 40,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "party",
+      "name": "Party Hat",
+      "symbol": "party.popper.fill",
+      "category": "hat",
+      "price": 120,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "beanie",
+      "name": "Cozy Beanie",
+      "symbol": "snowflake",
+      "category": "hat",
+      "price": 150,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "bow",
+      "name": "Big Bow",
+      "symbol": "gift.fill",
+      "category": "hat",
+      "price": 100,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "crown",
+      "name": "Royal Crown",
+      "symbol": "crown.fill",
+      "category": "hat",
+      "price": 600,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "bandana",
+      "name": "Red Bandana",
+      "symbol": "triangle.fill",
+      "category": "neck",
+      "price": 90,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "bowtie",
+      "name": "Bow Tie",
+      "symbol": "sparkles",
+      "category": "neck",
+      "price": 110,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "collar",
+      "name": "Red Collar",
+      "symbol": "circle.circle.fill",
+      "category": "neck",
+      "price": 80,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "scarf",
+      "name": "Mint Scarf",
+      "symbol": "wind",
+      "category": "neck",
+      "price": 160,
+      "food": 0,
+      "joy": 0,
+      "comfort": 0
+    },
+    {
+      "id": "bowl",
+      "name": "Food Bowl",
+      "symbol": "circle.bottomhalf.filled",
+      "category": "decor",
+      "price": 50,
+      "food": 0,
+      "joy": 0,
+      "comfort": 5
+    },
+    {
+      "id": "flowers",
+      "name": "Flower Patch",
+      "symbol": "camera.macro",
+      "category": "decor",
+      "price": 80,
+      "food": 0,
+      "joy": 0,
+      "comfort": 5
+    },
+    {
+      "id": "lamp",
+      "name": "Garden Lamp",
+      "symbol": "lamp.floor.fill",
+      "category": "decor",
+      "price": 120,
+      "food": 0,
+      "joy": 0,
+      "comfort": 6
+    },
+    {
+      "id": "tree",
+      "name": "Shade Tree",
+      "symbol": "tree.fill",
+      "category": "decor",
+      "price": 180,
+      "food": 0,
+      "joy": 0,
+      "comfort": 8
+    },
+    {
+      "id": "umbrella",
+      "name": "Sun Umbrella",
+      "symbol": "beach.umbrella.fill",
+      "category": "decor",
+      "price": 220,
+      "food": 0,
+      "joy": 0,
+      "comfort": 10
+    },
+    {
+      "id": "bed",
+      "name": "Fluffy Pet Bed",
+      "symbol": "bed.double.fill",
+      "category": "decor",
+      "price": 300,
+      "food": 0,
+      "joy": 0,
+      "comfort": 15
+    },
+    {
+      "id": "pond",
+      "name": "Splash Pond",
+      "symbol": "water.waves",
+      "category": "decor",
+      "price": 450,
+      "food": 0,
+      "joy": 0,
+      "comfort": 12
+    },
+    {
+      "id": "doghouse",
+      "name": "Pet House",
+      "symbol": "house.fill",
+      "category": "decor",
+      "price": 800,
+      "food": 0,
+      "joy": 0,
+      "comfort": 25
+    }
+  ],
+  "milestones": [
+    {
+      "id": "mb100",
+      "title": "Tidy Paws: free 100 MB",
+      "bytes": 100000000,
+      "coins": 30,
+      "gift": null
+    },
+    {
+      "id": "gb1",
+      "title": "Gigabyte Hero: free 1 GB",
+      "bytes": 1000000000,
+      "coins": 100,
+      "gift": "party"
+    },
+    {
+      "id": "gb5",
+      "title": "Storage Saver: free 5 GB",
+      "bytes": 5000000000,
+      "coins": 250,
+      "gift": "scarf"
+    },
+    {
+      "id": "gb10",
+      "title": "Cloud Whisperer: free 10 GB",
+      "bytes": 10000000000,
+      "coins": 500,
+      "gift": "crown"
+    },
+    {
+      "id": "gb25",
+      "title": "Legend of the Roll: free 25 GB",
+      "bytes": 25000000000,
+      "coins": 1000,
+      "gift": null
+    }
+  ],
+  "stages": {
+    "baby": 0,
+    "kid": 150,
+    "teen": 400,
+    "adult": 800,
+    "radiant": 1500
+  },
+  "junk": {
+    "screenshots": {
+      "coinsPerItem": 1,
+      "dailyTarget": 20,
+      "dailyReward": 30
+    },
+    "twins": {
+      "coinsPerItem": 1,
+      "dailyTarget": 10,
+      "dailyReward": 30
+    },
+    "giants": {
+      "coinsPerItem": 4,
+      "dailyTarget": 2,
+      "dailyReward": 40
+    },
+    "oopsies": {
+      "coinsPerItem": 1,
+      "dailyTarget": 8,
+      "dailyReward": 30
+    }
+  },
+  "prices": {
+    "photoMatch": 250
+  },
+  "tuning": {
+    "startCoins": 30,
+    "awakeFoodPerHour": 3,
+    "awakeJoyPerHour": 2.5,
+    "awakeEnergyPerHour": 4,
+    "sleepEnergyPerHour": 14,
+    "sleepFoodPerHour": 1.5,
+    "sickJoyFactor": 1.6,
+    "cozyDivisor": 120,
+    "minComfortFactor": 0.4,
+    "maxCozy": 100,
+    "sickCleanBelow": 20,
+    "medicineImmunityHours": 24,
+    "cleanupCoinCap": 60,
+    "cleanupXpCap": 60,
+    "cleanupXpPerItem": 3,
+    "cleanupXpBonus": 10,
+    "cleanupJoy": 8,
+    "firstCleanTodayBonus": 20,
+    "streakBonusPerDay": 3,
+    "streakBonusMaxDays": 7,
+    "digCoinsFound": 5,
+    "digCoinsEmpty": 2,
+    "digJoy": 3,
+    "digXp": 5,
+    "maxCleanupItemsPerDay": 5000,
+    "maxBytesPerItem": {
+      "screenshots": 50000000,
+      "twins": 100000000,
+      "giants": 20000000000,
+      "oopsies": 100000000
+    },
+    "scoreJunkRatio": 0.35
+  }
+}

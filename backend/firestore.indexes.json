@@ -1,0 +1,15 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "players",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "reminder.sent", "order": "ASCENDING" },
+        { "fieldPath": "reminder.hungryAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    { "collectionGroup": "players", "fieldPath": "state", "indexes": [] }
+  ]
+}
