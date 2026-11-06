@@ -1,0 +1,7 @@
+# Xcode personal settings and build output
+xcuserdata/
+DerivedData/
+build/
+*.xcuserstate
+*.xcscmblueprint
+.DS_Store
